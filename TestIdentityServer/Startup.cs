@@ -64,8 +64,8 @@ namespace TestIdentityServer
             services.AddAuthentication()
             .AddIdentityServerAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme, options =>
             {
-                options.Authority = "https://192.168.1.138:5001";
-                options.ApiName = "qvacarapibackend";
+                options.Authority = "https://192.168.1.138:32770";
+                options.ApiName = "qvacar.api.core";
                 options.JwtBackChannelHandler = new HttpClientHandler
                 {
                     ServerCertificateCustomValidationCallback =

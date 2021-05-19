@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>118b23ec-d8ac-4acd-93ec-b294e2fd2b47</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +11,8 @@
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.5" />
+    
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
   </ItemGroup>
 

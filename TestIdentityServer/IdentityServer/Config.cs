@@ -20,16 +20,16 @@ namespace TestIdentityServer
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
-                new ApiScope("qvacarapibackend","Qva Car Main Backend")
+                new ApiScope("qvacar.api.core","Qva Car Main Backend")
             };
         public static IEnumerable<ApiResource> ApiResources =>
            new ApiResource[] {
                 new ApiResource(
-                    "qvacarapibackend",
+                    "qvacar.api.core",
                     "Qva Car Backend Api",
                     new string[] {  })
                     {
-                        Scopes = { "qvacarapibackend"},
+                        Scopes = { "qvacar.api.core"},
                         ApiSecrets = { new Secret("apisecret".Sha256())}
                     }
                };
@@ -42,16 +42,22 @@ namespace TestIdentityServer
                 {
                     ClientName = "Qva Car Mobile",
                     RequireClientSecret = false,
-                    ClientId = "mobileqvacarbackendapiclient",
+                    ClientId = "qvacar.mobile.xamarin",
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
                     AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "qvacarapibackend", IdentityServerConstants.StandardScopes.OfflineAccess },
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        "qvacar.api.core",                        
+                    },
                     RequireConsent = false,
-                    RedirectUris = { "xamarinformsclients://callback" },
+                    RedirectUris = { "qvacarmobilexamarin://callback" },
                     UpdateAccessTokenClaimsOnRefresh = true,
                     AllowAccessTokensViaBrowser = true,
-                    PostLogoutRedirectUris = { "xamarinformsclients://logout" },
+                    PostLogoutRedirectUris = { "qvacarmobilexamarin://logout" },
                 },
             };
     }
