@@ -11,7 +11,6 @@ using System.Reflection;
 using IdentityServer4.EntityFramework.DbContexts;
 using System.Linq;
 using IdentityServer4.EntityFramework.Mappers;
-
 namespace TestIdentityServer
 {
     public class Startup
@@ -25,13 +24,11 @@ namespace TestIdentityServer
             Configuration = configuration;
         }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
+       public void ConfigureServices(IServiceCollection services)
+       {
             services.AddControllersWithViews();
-
-            const string connectionString = "Data Source=sqlserver;Initial Catalog=TestIdentitySever;User Id=sa;Password=PasswordO1.;";
+            const string connectionString = "Data Source=sqlserver;Database=TestIdentitySever;User Id=sa;Password=PasswordO1.;";
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
             var builder = services.AddIdentityServer(options =>
             {
                 options.Events.RaiseErrorEvents = true;
@@ -39,7 +36,6 @@ namespace TestIdentityServer
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
 
-                // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
                 options.EmitStaticAudienceClaim = true;
             })
             .AddTestUsers(TestUsers.Users)
@@ -54,20 +50,12 @@ namespace TestIdentityServer
             {
                 options.ConfigureDbContext = builder =>
                     builder.UseSqlServer(connectionString,
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-
-                // this enables automatic token cleanup. this is optional.
+                        sql => sql.MigrationsAssembly(migrationsAssembly));               
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 30;
             });
 
-            // in-memory, code config
-            // builder.AddInMemoryIdentityResources(Config.IdentityResources);
-            // this adds the operational data from DB (codes, tokens, consents)
-
-            //builder.AddInMemoryApiResources(Config.ApiResources);
-            //builder.AddInMemoryApiScopes(Config.ApiScopes);
-            //builder.AddInMemoryClients(Config.Clients);
+           
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
@@ -84,10 +72,11 @@ namespace TestIdentityServer
                 //    });
             });
 
+            var hostURl = System.Environment.GetEnvironmentVariable("HOST_URL");
             services.AddAuthentication()
             .AddIdentityServerAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme, options =>
             {
-                options.Authority = "https://192.168.1.138:5001";
+                options.Authority = hostURl;
                 options.ApiName = "qvacar.api.core";
                 options.JwtBackChannelHandler = new HttpClientHandler
                 {
@@ -98,7 +87,7 @@ namespace TestIdentityServer
                 // options.BackchannelHttpHandler = null;// new System.Net.Http.HttpClientHandler { ServerCertificateCustomValidationCallback = delegate { return true; } };
             });
         }
-
+       
         public void Configure(IApplicationBuilder app)
         {
             InitializeDatabase(app);
@@ -125,8 +114,7 @@ namespace TestIdentityServer
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
 
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                context.Database.Migrate();
-
+                context.Database.Migrate();               
                 if (!context.Clients.Any())
                 {
                     foreach (var client in Config.GetClients())

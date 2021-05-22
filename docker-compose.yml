@@ -11,12 +11,9 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: '0:0'
-    ports:
-      - 14331:1433
     environment:
         ACCEPT_EULA: "Y"
         SA_PASSWORD: PasswordO1.
-        #MSSQL_PID: Express
     volumes:
       - isDataSql:/var/opt/mssql/data
     networks:

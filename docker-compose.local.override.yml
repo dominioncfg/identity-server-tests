@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  sqlserver:
+    hostname: sqlserver
+    container_name: customSql
+    ports:
+      - 14332:1433
+    volumes:
+      - localISData:/var/opt/mssql/data
+    networks:
+       - localIsNet
+
+  testidentityserver:    
+    container_name: customidpv2
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - HOST_URL=https://192.168.1.138:32250
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    networks:
+      - localIsNet
+    depends_on: 
+     - sqlserver
+
+networks:
+  localIsNet:
+    driver: bridge
+volumes:
+  localISData:
+    driver: local
+
+     
