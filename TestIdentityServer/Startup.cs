@@ -29,7 +29,7 @@ namespace TestIdentityServer
         {
             services.AddControllersWithViews();
 
-            const string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=TestIdentitySever;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            const string connectionString = "Data Source=sqlserver;Initial Catalog=TestIdentitySever;User Id=sa;Password=PasswordO1.;";
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             var builder = services.AddIdentityServer(options =>

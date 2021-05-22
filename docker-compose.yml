@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  testidentityserver:
+    image: ${DOCKER_REGISTRY-}testidentityserver
+    build:
+      context: .
+      dockerfile: TestIdentityServer/Dockerfile
+    networks:
+       - isTestApp 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    user: '0:0'
+    ports:
+      - 14331:1433
+    environment:
+        ACCEPT_EULA: "Y"
+        SA_PASSWORD: PasswordO1.
+        #MSSQL_PID: Express
+    volumes:
+      - isDataSql:/var/opt/mssql/data
+    networks:
+       - isTestApp
+networks:
+  isTestApp:
+    driver: bridge
+volumes:
+  isDataSql:
+    driver: local
