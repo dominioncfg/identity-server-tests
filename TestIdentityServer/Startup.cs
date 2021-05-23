@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using IdentityServer4.AccessTokenValidation;
-using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +10,11 @@ using System.Reflection;
 using IdentityServer4.EntityFramework.DbContexts;
 using System.Linq;
 using IdentityServer4.EntityFramework.Mappers;
+using Microsoft.AspNetCore.Identity;
+using System;
+using TestIdentityServer.Model;
+using TestIdentityServer.Infra;
+
 namespace TestIdentityServer
 {
     public class Startup
@@ -24,11 +28,38 @@ namespace TestIdentityServer
             Configuration = configuration;
         }
 
-       public void ConfigureServices(IServiceCollection services)
-       {
+        public void ConfigureServices(IServiceCollection services)
+        {
             services.AddControllersWithViews();
             const string connectionString = "Data Source=sqlserver;Database=TestIdentitySever;User Id=sa;Password=PasswordO1.;";
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+            services.AddDbContext<QvaCarUsersDBContext>(o =>
+            {
+                string userCS = connectionString;
+                o.UseSqlServer(userCS, sql => sql.MigrationsAssembly(migrationsAssembly));
+            });
+
+            services
+               .AddIdentity<QvaCarIdentityUser, QvaCarIdentityRole>(options =>
+               {
+                   options.Password.RequiredLength = 6;
+                   options.Password.RequireDigit = true;
+                   options.Password.RequireNonAlphanumeric = true;
+
+                   options.Lockout.MaxFailedAccessAttempts = 3;
+                   options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+
+                   options.SignIn.RequireConfirmedEmail = true;
+                   options.User.RequireUniqueEmail = true;
+               })
+               .AddEntityFrameworkStores<QvaCarUsersDBContext>()
+               .AddDefaultTokenProviders();
+
+            services.Configure<DataProtectionTokenProviderOptions>(opt => opt.TokenLifespan = TimeSpan.FromHours(2));
+
+
+            //Identity Server
             var builder = services.AddIdentityServer(options =>
             {
                 options.Events.RaiseErrorEvents = true;
@@ -38,7 +69,7 @@ namespace TestIdentityServer
 
                 options.EmitStaticAudienceClaim = true;
             })
-            .AddTestUsers(TestUsers.Users)
+            .AddAspNetIdentity<QvaCarIdentityUser>()
             .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
@@ -50,12 +81,12 @@ namespace TestIdentityServer
             {
                 options.ConfigureDbContext = builder =>
                     builder.UseSqlServer(connectionString,
-                        sql => sql.MigrationsAssembly(migrationsAssembly));               
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 30;
             });
 
-           
+
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
@@ -68,7 +99,7 @@ namespace TestIdentityServer
                 //    {
                 //        policyBuilder.AuthenticationSchemes.Add(IdentityServerAuthenticationDefaults.AuthenticationScheme);
                 //        policyBuilder.RequireAuthenticatedUser();
-                        
+
                 //    });
             });
 
@@ -87,10 +118,11 @@ namespace TestIdentityServer
                 // options.BackchannelHttpHandler = null;// new System.Net.Http.HttpClientHandler { ServerCertificateCustomValidationCallback = delegate { return true; } };
             });
         }
-       
+
         public void Configure(IApplicationBuilder app)
         {
             InitializeDatabase(app);
+            IdentitySeedData.CreateIdentitySeedData(app);
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -114,7 +146,7 @@ namespace TestIdentityServer
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
 
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                context.Database.Migrate();               
+                context.Database.Migrate();
                 if (!context.Clients.Any())
                 {
                     foreach (var client in Config.GetClients())
@@ -151,7 +183,7 @@ namespace TestIdentityServer
                     context.SaveChanges();
                 }
 
-               
+
             }
         }
     }
