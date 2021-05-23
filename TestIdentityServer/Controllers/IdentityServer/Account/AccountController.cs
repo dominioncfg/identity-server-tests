@@ -3,14 +3,12 @@ using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using TestIdentityServer.Model;
 
@@ -24,7 +22,6 @@ namespace IdentityServerHost.Quickstart.UI
         private readonly UserManager<QvaCarIdentityUser> _userManager;
         private readonly SignInManager<QvaCarIdentityUser> _signInManager;
         private readonly IIdentityServerInteractionService _interaction;
-        private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
 
@@ -32,23 +29,25 @@ namespace IdentityServerHost.Quickstart.UI
             UserManager<QvaCarIdentityUser> userManager,
             SignInManager<QvaCarIdentityUser> signInManager,
             IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _interaction = interaction;
-            _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
         }
 
         #region Log In
         [HttpGet]
-        public async Task<IActionResult> Login(string returnUrl)
+        public IActionResult Login(string returnUrl)
         {
-            var vm = await BuildLoginViewModelAsync(returnUrl);
+            var vm = new LoginViewModel
+            {
+                ReturnUrl = returnUrl,
+                Email = string.Empty,
+            };
             return View(vm);
         }
 
@@ -64,10 +63,19 @@ namespace IdentityServerHost.Quickstart.UI
             if (ModelState.IsValid)
             {
                 var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, true, lockoutOnFailure: true);
-                if (result.Succeeded)
+                
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                var validationPassed = false;
+
+                if(user != null)
                 {
-                    var user = await _userManager.FindByNameAsync(model.Username);
+                    var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, true, lockoutOnFailure: true);
+                    validationPassed = result.Succeeded;
+                }
+                
+                if (validationPassed)
+                {
                     await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
 
                     if (context != null)
@@ -77,10 +85,9 @@ namespace IdentityServerHost.Quickstart.UI
                             return this.LoadingPage("Redirect", model.ReturnUrl);
                         }
 
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                         return Redirect(model.ReturnUrl);
                     }
-                  
+
                     if (Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
@@ -96,14 +103,17 @@ namespace IdentityServerHost.Quickstart.UI
                     }
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
                 ModelState.AddModelError(string.Empty, InvalidCredentialsErrorMessage);
             }
 
-            var vm = await BuildLoginViewModelAsync(model);
+            var vm = new LoginViewModel
+            {
+                ReturnUrl = model.ReturnUrl,
+                Email = model.Email,
+            };
             return View(vm);
         }
-
         private async Task<IActionResult> CancelLoginAsync(LoginViewModel model)
         {
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
@@ -125,33 +135,6 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 return Redirect("~/");
             }
-        }
-
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginViewModel model)
-        {
-            var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
-            vm.Username = model.Username;
-            return vm;
-        }
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
-        {
-            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
-            {
-                // this is meant to short circuit the UI and only trigger the one external IdP
-                var vm = new LoginViewModel
-                {
-                    ReturnUrl = returnUrl,
-                    Username = context?.LoginHint,
-                };
-
-                return vm;
-            }           
-            return new LoginViewModel
-            {
-                ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
-            };
         }
         #endregion
 
@@ -177,7 +160,7 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 await _signInManager.SignOutAsync();
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
-            }           
+            }
 
             return View("LoggedOut", vm);
         }
