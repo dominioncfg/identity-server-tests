@@ -1,0 +1,14 @@
+﻿@model RegistrationCodeSentViewModel
+
+<div class="container">
+    <div class="lead">
+        <h1>Registration Done, Waiting for Confirmation</h1>
+        <p>You need to confirm your email before login into the App.</p>
+    </div>
+    <div class="card-body">
+        <form asp-controller="Account" asp-action="Login">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <button class="btn btn-secondary" name="button" value="cancel">Got It</button>
+        </form>
+    </div>
+</div>

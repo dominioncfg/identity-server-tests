@@ -15,3 +15,6 @@ services:
   sqlserver:
     ports:
       - 14331:1433
+  emailServer:
+    ports:
+      - 5002:8025

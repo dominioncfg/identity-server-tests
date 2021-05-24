@@ -18,9 +18,14 @@ services:
       - isDataSql:/var/opt/mssql/data
     networks:
        - isTestApp
+  emailServer:
+    image: mailhog/mailhog 
+    networks:
+      - isTestApp
 networks:
   isTestApp:
     driver: bridge
 volumes:
   isDataSql:
     driver: local
+    #docker run -p 5005:8025 mailhog/mailhog

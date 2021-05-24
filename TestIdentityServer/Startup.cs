@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using TestIdentityServer.Model;
 using TestIdentityServer.Infra;
+using TestIdentityServer.Services;
 
 namespace TestIdentityServer
 {
@@ -31,8 +32,11 @@ namespace TestIdentityServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            const string connectionString = "Data Source=sqlserver;Database=TestIdentitySever;User Id=sa;Password=PasswordO1.;";
+            string connectionString = Configuration["ConnectionStrings:UsersDb"];
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+            services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));
+            services.AddTransient<IEmailService, EmailService>();
 
             services.AddDbContext<QvaCarUsersDBContext>(o =>
             {
