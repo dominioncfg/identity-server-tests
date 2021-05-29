@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TestIdentityServer.Model;
@@ -49,16 +50,22 @@ namespace TestIdentityServer.Controllers.IdentityServer.UserRegistration
             var userToCreate = new QvaCarIdentityUser
             {
                 Id = Guid.NewGuid(),
-                UserName = model.UserName,
+                UserName = model.Email,
                 Email = model.Email,
                 EmailConfirmed = false,
+                Age = model.Age,
+                ProvinceId = model.ProvinceId
             };
 
             List<Claim> claims = new List<Claim>();
 
+            var provinceName = Province.GetAll().FirstOrDefault(x => x.Id == model.ProvinceId)?.Name;
+
             claims.Add(new Claim(JwtClaimTypes.Address, model.Address));
             claims.Add(new Claim(JwtClaimTypes.GivenName, model.GivenName));
             claims.Add(new Claim(JwtClaimTypes.FamilyName, model.FamilyName));
+            claims.Add(new Claim(JwtClaimTypes.Address, model.Age.ToString()));
+            claims.Add(new Claim(QvaCarClaims.Province, provinceName??""));
 
             var createResult = await _userManager.CreateAsync(userToCreate, model.Password);
 
@@ -88,7 +95,7 @@ namespace TestIdentityServer.Controllers.IdentityServer.UserRegistration
             return RedirectToAction(nameof(RegistrationCodeSent), new { returnUrl = model.ReturnUrl });
         }
         [HttpGet]
-        public  IActionResult RegistrationCodeSent(string returnUrl)
+        public IActionResult RegistrationCodeSent(string returnUrl)
         {
             return View(new RegistrationCodeSentViewModel() { ReturnUrl = returnUrl });
         }

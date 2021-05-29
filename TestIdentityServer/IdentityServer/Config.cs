@@ -4,21 +4,33 @@ using System.Collections.Generic;
 
 namespace TestIdentityServer
 {
+    public static class QvaCarClaims
+    {
+        public const string Province = "province";
+    }
+
     public static class Config
     {
         public static IEnumerable<IdentityResource> GetIdentityResources()
         {
+            var provinceIdentityRes = new IdentityResource(
+                        name: "province",
+                        displayName: "Province",
+                        userClaims: new[] { QvaCarClaims.Province });
+
             return new IdentityResource[]
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
+                new IdentityResources.Address(),
+                provinceIdentityRes,
             };
         }
 
         public static IEnumerable<ApiScope> GetApiScopes()
         {
             var coreApiScopes = new ApiScope("qvacar.api.core", "Qva Car Main Backend");
-            return new [] { coreApiScopes };
+            return new[] { coreApiScopes };
         }
 
         public static IEnumerable<ApiResource> GetApiResources()
@@ -48,6 +60,8 @@ namespace TestIdentityServer
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Address,
+                        QvaCarClaims.Province,
                         IdentityServerConstants.StandardScopes.OfflineAccess,
                         "qvacar.api.core",
                     },

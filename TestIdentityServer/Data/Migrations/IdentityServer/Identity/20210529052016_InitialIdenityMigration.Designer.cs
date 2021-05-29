@@ -10,7 +10,7 @@ using TestIdentityServer.Infra;
 namespace TestIdentityServer.Data.Migrations.IdentityServer.Identity
 {
     [DbContext(typeof(QvaCarUsersDBContext))]
-    [Migration("20210523095811_InitialIdenityMigration")]
+    [Migration("20210529052016_InitialIdenityMigration")]
     partial class InitialIdenityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -144,6 +144,9 @@ namespace TestIdentityServer.Data.Migrations.IdentityServer.Identity
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
@@ -186,6 +189,9 @@ namespace TestIdentityServer.Data.Migrations.IdentityServer.Identity
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

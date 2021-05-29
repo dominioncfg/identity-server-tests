@@ -5,20 +5,16 @@ namespace TestIdentityServer.ViewModels
 {
     public class RegisterUserViewModel
     {
-        [MaxLength(200)]
-        [Display(Name = "Username")]
-        public string UserName { get; set; }
-
-        [MaxLength(200)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; }
-
         [Required]
         [MaxLength(200)]
         [Display(Name = "Email")]
         [EmailAddress]
         public string Email { get; set; }
+
+        [MaxLength(200)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string Password { get; set; }
 
         [Required]
         [MaxLength(250)]
@@ -36,16 +32,34 @@ namespace TestIdentityServer.ViewModels
         public string Address { get; set; }
 
         [Required]
-        [MaxLength(2)]
-        [Display(Name = "Country")]
-        public string Country { get; set; }
+        [Display(Name = "Province")]
+        public int ProvinceId { get; set; }
 
-        public SelectList CountryCodes { get; set; } =
+        [Required]
+        [Display(Name = "Age")]
+        public int Age { get; set; }
+
+        public SelectList Provinces { get; set; } =
             new SelectList(
-                new[] {
-                    new { Id = "BE", Value = "Belgium" },
-                    new { Id = "US", Value = "United States of America" },
-                    new { Id = "IN", Value = "India" } },
+                new[] 
+                {
+                    new {Id= 01,Value = "Pinar Del Rio"},
+                    new {Id= 02,Value = "Artemisa"},
+                    new {Id= 03,Value = "La Habana"},
+                    new {Id= 04,Value = "Mayabeque"},
+                    new {Id= 05,Value = "Matanzas "},
+                    new {Id= 06,Value = "Cienfuegos"},
+                    new {Id= 07,Value = "Villa Clara"},
+                    new {Id= 08,Value = "Sancti Spíritus"},
+                    new {Id= 09,Value = "Ciego De Ávila"},
+                    new {Id= 10,Value = "Camaguey"},
+                    new {Id= 11,Value = "Las Tunas"},
+                    new {Id= 12,Value = "Granma"},
+                    new {Id= 13,Value = "Holguin"},
+                    new {Id= 14,Value = "Santiago De Cuba"},
+                    new {Id= 15,Value = "Guantanamo"},
+                    new {Id= 16,Value = "Isla De La Juventud"},
+                },
                 "Id",
                 "Value");
 

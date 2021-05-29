@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TestIdentityServer.Model;
 
@@ -45,33 +48,42 @@ namespace TestIdentityServer.Infra
         {
             UserManager<QvaCarIdentityUser> userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<QvaCarIdentityUser>>();
 
-            string username = "Alice";
-            string email = "alice@gmail.com";
+            string email = "josecdom94@gmail.com";
             string password = "Blablacar@1";
 
-            string firstName = "Alice";
-            string lastName = "Smith";
-            int age = 23;
+            string firstName = "Jose Carlos";
+            string lastName = "Nuñez";
+            int age = 26;
+            string address =  "Yugoslavia 7";
 
-            if (await userManager.FindByNameAsync(username) == null)
+            if (await userManager.FindByNameAsync(email) == null)
             {
                 QvaCarIdentityUser user = new QvaCarIdentityUser
                 {
                     Id = new Guid(),
-                    UserName = username,
+                    UserName = email,
                     Email = email,
                     EmailConfirmed = true,
                     FirstName = firstName,
                     LastName = lastName,
                     Age = age,
+                    ProvinceId = Province.Cienfuegos.Id,  
+                    Address = address,
                 };
-
                 IdentityResult result = await userManager.CreateAsync(user, password);
                 if (result.Succeeded)
                 {
                     var adminRole = QvaCarIdentityRole.AdminRole;
                     await userManager.AddToRoleAsync(user, adminRole.Name);
                 }
+
+                List<Claim> claims = new List<Claim>();
+                claims.Add(new Claim(JwtClaimTypes.GivenName, user.FirstName));
+                claims.Add(new Claim(JwtClaimTypes.FamilyName, user.LastName));
+                claims.Add(new Claim(JwtClaimTypes.Address, user.Address));
+                claims.Add(new Claim(QvaCarClaims.Province, Province.Cienfuegos.Name));
+
+                await userManager.AddClaimsAsync(user, claims);
             }
         }
     }
