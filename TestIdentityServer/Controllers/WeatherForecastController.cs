@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
+using TestIdentityServer.ViewModels;
 using System.Linq;
-
+using TestIdentityServer.Models;
+using IdentityModel;
 
 namespace TestIdentityServer.Controllers
 {
@@ -25,17 +26,28 @@ namespace TestIdentityServer.Controllers
             _logger = logger;
         }
 
+
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public WeatherForecastViewModel Get()
         {
+            var userId = User.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject)?.Value;
+            var provinceName = User.Claims.FirstOrDefault(x => x.Type == QvaCarClaims.Province)?.Value;
+         
             var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var items = Enumerable.Range(1, 5).Select(index => new WeatherForecastItemViewModel
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
-            .ToArray();
+            .ToList();
+
+            return new WeatherForecastViewModel()
+            {
+                UserId = userId,
+                ProvinceName = provinceName,
+                Items = items,
+            };
         }
     }
 }

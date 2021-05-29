@@ -30,6 +30,7 @@ namespace TestIdentityServer
         public static IEnumerable<ApiScope> GetApiScopes()
         {
             var coreApiScopes = new ApiScope("qvacar.api.core", "Qva Car Main Backend");
+            //var province = new ApiScope(QvaCarClaims.Province, "Province Api Scope");
             return new[] { coreApiScopes };
         }
 
@@ -38,9 +39,9 @@ namespace TestIdentityServer
             var qvaCarCoreApiResouce = new ApiResource(
                     "qvacar.api.core",
                     "Qva Car Backend Api",
-                    new string[] { })
+                    new string[] { QvaCarClaims.Province })
             {
-                Scopes = { "qvacar.api.core" },
+                Scopes = { "qvacar.api.core", },
                 ApiSecrets = { new Secret("apisecret".Sha256()) }
             };
             return new[] { qvaCarCoreApiResouce };

@@ -1,8 +1,8 @@
 using System;
 
-namespace TestIdentityServer
+namespace TestIdentityServer.Models
 {
-    public class WeatherForecast
+    public class WeatherForecastItemViewModel
     {
         public DateTime Date { get; set; }
 
