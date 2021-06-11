@@ -10,7 +10,7 @@ using IdentityModel;
 namespace TestIdentityServer.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/weather")]
     [Authorize(AuthenticationSchemes ="Bearer")]
     public class WeatherForecastController : ControllerBase
     {
