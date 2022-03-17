@@ -48,13 +48,13 @@ namespace TestIdentityServer.Infra
         {
             UserManager<QvaCarIdentityUser> userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<QvaCarIdentityUser>>();
 
-            string email = "josecdom94@gmail.com";
-            string password = "Blablacar@1";
+            string email = "pepitoperez@gmail.com";
+            string password = "SuperPass@1";
 
-            string firstName = "Jose Carlos";
-            string lastName = "Nuñez";
+            string firstName = "Jose;
+            string lastName = "Perez";
             int age = 26;
-            string address =  "Yugoslavia 7";
+            string address =  "Calle 13";
 
             if (await userManager.FindByNameAsync(email) == null)
             {
