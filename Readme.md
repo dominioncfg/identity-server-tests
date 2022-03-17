@@ -1,3 +1,3 @@
  # Identity Server Tests
  
- A test project for learning Indentity Server + Asp Net Core Identity
+ A test project with an Identity Provider for learning Indentity Server + Asp Net Core Identity.
