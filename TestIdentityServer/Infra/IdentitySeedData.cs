@@ -51,7 +51,7 @@ namespace TestIdentityServer.Infra
             string email = "pepitoperez@gmail.com";
             string password = "SuperPass@1";
 
-            string firstName = "Jose;
+            string firstName = "Jose";
             string lastName = "Perez";
             int age = 26;
             string address =  "Calle 13";
